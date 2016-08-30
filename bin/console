@@ -1,0 +1,27 @@
+#!/usr/bin/env ruby
+require_relative "../lib/company.rb"
+require_relative "../lib/front_page.rb"
+require_relative "../lib/google_scraper.rb"
+require_relative "../lib/reddit_scraper.rb"
+require_relative "../lib/market_quoter.rb"
+
+require "bundler/setup"
+# require "Market_Quoter"
+require "irb"
+# require "market_quoter"
+
+# You can add fixtures and/or initialization code here to make experimenting
+# with your gem easier. You can also use a different console, if you like.
+
+# (If you use this, don't forget to add pry to your Gemfile!)
+# require "pry"
+# Pry.start
+def reload!
+ load_all './lib'
+ # needs to not just re-load environment but rather reload everything in environment.
+
+end
+
+# IRB.start
+ss = Market_Quoter.new
+ss.run

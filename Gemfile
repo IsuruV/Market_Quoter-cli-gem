@@ -1,0 +1,15 @@
+source "https://rubygems.org"
+
+gem 'pry'
+gem 'nokogiri', '1.6.8'
+gem 'webmock'
+gem 'vcr'
+gem 'rspec'
+gem 'jekyll'
+gem 'activemodel-serializers-xml'
+gem 'active_model_serializers'
+gem 'mongo_mapper'
+gem 'bson_ext'
+gem 'ib-ruby'
+gem 'ib'
+gem 'colorize'
