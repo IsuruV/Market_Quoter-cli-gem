@@ -11,9 +11,14 @@ class Market_Quoter
     self.greetings
   end
   def make_front_page
+    begin
     gainers_losers = Google_Scraper.scrape_front_page_gain_loss
     news = Google_Scraper.scrape_front_page_news
     indexes = Google_Scraper.scrape_front_page_indexes
+    rescue
+      puts "NO INTERNET CONNECTION DETECTED"
+      exit
+    end
     page = Front_Page.new(gainers_losers)
     page.set_from_hash(news)
     page.set_from_array(indexes)
@@ -21,12 +26,17 @@ class Market_Quoter
   end
 
   def make_company(input)
+    begin
     reddit = Reddit_Scraper.scrape_squawk_box(input)
     summary = Google_Scraper.scrape_company_page_summary(input)
     managers = Google_Scraper.scrape_company_page_managers(input)
     stats = Google_Scraper.scrape_company_page_stats(input)
     events = Google_Scraper.scrape_company_page_events(input)
     ticker_price = Google_Scraper.scrape_company_current_price(input)
+    rescue
+      puts "NO INTERNET CONNECTION DETECTED"
+      exit
+    end
 
     company = Company.new(summary)
     company.set_events(events)
@@ -41,12 +51,12 @@ class Market_Quoter
   def display_company_info
     puts ""
     puts ""
-    puts "Company: #{new_company.name}".upcase.colorize(:blue).bold
+    puts "Company: #{new_company.name}".upcase.colorize(:color => :blue).bold
     puts "----------------------------".bold
     puts ""
     puts "Description:".bold
-    puts "#{new_company.description}"
-    puts "website:".bold+ "#{new_company.website} "
+    puts "#{new_company.description}".bold
+    puts "website:".bold+ "#{new_company.website} ".bold
     puts "----------------------------".bold
   end
 
@@ -117,8 +127,8 @@ class Market_Quoter
     puts ""
     puts "Index ------ Value ------ Movement".bold
     indexes.each do |index|
-      puts "#{index[:name]}   ".bold+  "#{index[:value]}   #{index[:movement]}"
-      puts "------------------------------------"
+      puts "#{index[:name]}   ".bold+  "#{index[:value].colorize(:green).bold}   #{index[:movement]}"
+      puts "------------------------------------".bold
     end
   end
 
@@ -160,6 +170,11 @@ class Market_Quoter
     elsif input.upcase == "COMPANY"
       self.new_comp
       self.comp
+    elsif input.upcase == "EXIT"
+      exit
+    else
+      puts "ENTER A SPECIFIED CHOICE or 'exit' to exit gem.".colorize(:red).bold
+      self.greetings
     end
   end
 
@@ -172,28 +187,41 @@ class Market_Quoter
     puts ""
     puts "Select from the following choices:"
     puts ""
-    puts "-- News --".bold+ "      (Displays current financial headline news)"
+    puts "1.".colorize(:blue).bold+ " News ".bold+ "      (Displays current financial headline news)"
     puts ""
-    puts "-- Indexes --".bold+ "   (Displays the statues of most popular indexes)"
+    puts "2.".colorize(:blue).bold+ " Indexes ".bold+ "   (Displays the statues of most popular indexes)"
     puts ""
-    puts "-- Gainers --".bold+ "   (Displays the stocks with the most daily gains)"
+    puts "3.".colorize(:blue).bold+ " Gainers ".bold+ "   (Displays the stocks with the most daily gains)"
     puts ""
-    puts "-- Losers -- ".bold+ "   (Displays stocks with the most daily losses)"
+    puts "4.".colorize(:blue).bold+ " Losers ".bold+ "   (Displays stocks with the most daily losses)"
     puts ""
     puts ""
     print "Choice: "
-    input = gets.chomp
+    input = gets.chomp.to_s.upcase
+
     case input.upcase
     when "NEWS"
+      front_page.display_front_page_news
+      self.front
+    when "1"
       front_page.display_front_page_news
       self.front
     when "INDEXES"
       front_page.display_front_page_indexes
       self.front
+    when "2"
+      front_page.display_front_page_indexes
+      self.front
     when "GAINERS"
       front_page.display_front_page_gainers
       self.front
+    when "3"
+      front_page.display_front_page_gainers
+      self.front
     when "LOSERS"
+      front_page.display_front_page_losers
+      self.front
+    when "4"
       front_page.display_front_page_losers
       self.front
     when "COMPANY"
@@ -201,6 +229,8 @@ class Market_Quoter
       self.comp
     when "MENU"
       self.greetings
+    when "EXIT"
+      exit
     end
   end
 
@@ -218,198 +248,70 @@ class Market_Quoter
       end
   end
   def comp
-    # puts "Enter a company name or ticker"
-    # input = gets.chomp
-    # company = Market_Quoter.new
-    # company.make_company(input)
+
     puts ""
     puts ""
     puts "** Enter 'Menu' to go back to the main menu or 'Today' to view current news and trends **".underline
     puts ""
     puts "Select from the following choices:"
     puts ""
-    puts "-- About --".bold+ "     (Short description about the company)"
-    puts "-- Managers --".bold+ "  (Lists the ranking leaders of the company)"
-    puts "-- Price -- ".bold+ "    (Current price the company is trading at)"
-    puts "-- Earnings --".bold+ "  (Earnings report)"
-    puts "-- Events -- ".bold+ "   (Current and upcoming events effecting the company)"
-    puts "-- Opinions --".bold+ "  (Opinons of other private investors about the company)"
+    puts "1.".colorize(:red).bold+ " About ".bold+ "     (Short description about the company)"
+    puts "2.".colorize(:red).bold+ " Managers ".bold+ "  (Lists the ranking leaders of the company)"
+    puts "3.".colorize(:red).bold+ " Price ".bold+ "    (Current price the company is trading at)"
+    puts "4.".colorize(:red).bold+ " Earnings ".bold+ "  (Earnings report)"
+    puts "5.".colorize(:red).bold+ " Events ".bold+ "   (Current and upcoming events effecting the company)"
+    puts "6.".colorize(:red).bold+ " Opinions ".bold+ "  (Opinons of other private investors about the company)"
     puts ""
     puts ""
     print "Choice: "
-    input = gets.chomp
+    input = gets.chomp.to_s.upcase
     case input.upcase
     when "ABOUT"
       @current.display_company_info
       self.comp
+    when "1"
+      @current.display_company_info
+      self.comp
     when "MANAGERS"
-        @current.display_company_managers
-        self.comp
-      when "PRICE"
-        @current.display_company_price
-        self.comp
-      when "EARNINGS"
-        @current.display_company_stats
-        self.comp
-      when "EVENTS"
-        @current.display_company_events
-        self.comp
-      when "OPINIONS"
-        @current.display_company_posts
-        self.comp
-      when "TODAY"
-        self.front
-      when "Menu"
-        self.greetings
-      when "COMPANY"
-        self.new_comp
-        self.comp
+      @current.display_company_managers
+      self.comp
+    when "2"
+      @current.display_company_managers
+      self.comp
+    when "PRICE"
+      @current.display_company_price
+      self.comp
+    when "3"
+      @current.display_company_price
+      self.comp
+    when "EARNINGS"
+      @current.display_company_stats
+      self.comp
+    when "4"
+      @current.display_company_stats
+      self.comp
+    when "EVENTS"
+      @current.display_company_events
+      self.comp
+    when "5"
+      @current.display_company_events
+      self.comp
+    when "OPINIONS"
+      @current.display_company_posts
+       self.comp
+    when "6"
+      @current.display_company_posts
+       self.comp
+    when "TODAY"
+      self.front
+    when "MENU"
+      self.greetings
+    when "COMPANY"
+      self.new_comp
+      self.comp
+    when "EXIT"
+      exit
     end
   end
 
 end
-
-
-
-
-
-
-
-#*********************************************************************************
-# require "Market_Quoter/version"
-#
-# module MarketQuoter
-#   # Your code goes here...
-# end
-# require_relative "../lib/company.rb"
-# require_relative "../lib/front_page.rb"
-# require_relative "../lib/google_scraper.rb"
-# require_relative "../lib/reddit_scraper.rb"
-#
-# class Market_Quoter
-#
-#   def make_front_page
-#     gainers_losers = Google_Scraper.scrape_front_page_gain_loss
-#     news = Google_Scraper.scrape_front_page_news
-#     indexes = Google_Scraper.scrape_front_page_indexes
-#     front_page = Front_Page.new(gainers_losers)
-#     front_page.set_from_hash(news)
-#     front_page.set_from_array(indexes)
-#   end
-#
-#   def make_company(input)
-#     reddit = Reddit_Scraper.scrape_squawk_box(input)
-#     summary = Google_Scraper.scrape_company_page_summary(input)
-#     managers = Google_Scraper.scrape_company_page_managers(input)
-#     stats = Google_Scraper.scrape_company_page_stats(input)
-#     events = Google_Scraper.scrape_company_page_events(input)
-#     ticker_price = Google_Scraper.scrape_company_current_price(input)
-#
-#     new_company = Company.new(summary)
-#     new_company.set_events(events)
-#     new_company.set_posts(reddit)
-#     new_company.set_from_hash(managers)
-#     new_company.set_from_hash(stats)
-#     new_company.set_from_hash(ticker_price)
-#
-#   end
-#
-#   # def add_attributes_to_students
-#   #   Student.all.each do |student|
-#   #     attributes = Scraper.scrape_profile_page(student.profile_url)
-#   #     student.add_student_attributes(attributes)
-#   #   end
-#   # end
-#
-#   # def display_students
-#   #   Student.all.each do |student|
-#   #     puts "#{student.name.upcase}".colorize(:blue)
-#   #     puts "  location:".colorize(:light_blue) + " #{student.location}"
-#   #     puts "  profile quote:".colorize(:light_blue) + " #{student.profile_quote}"
-#   #     puts "  bio:".colorize(:light_blue) + " #{student.bio}"
-#   #     puts "  twitter:".colorize(:light_blue) + " #{student.twitter}"
-#   #     puts "  linkedin:".colorize(:light_blue) + " #{student.linkedin}"
-#   #     puts "  github:".colorize(:light_blue) + " #{student.github}"
-#   #     puts "  blog:".colorize(:light_blue) + " #{student.blog}"
-#   #     puts "----------------------".colorize(:green)
-#   #   end
-#   # end
-#
-#   def display_company_info
-#     puts "Company: #{new_company.name}"
-#     puts "----------------------------"
-#     puts "Description:"
-#     puts "#{new_company.description}"
-#     puts "website: #{new_company.website} "
-#   end
-#
-#   def display_company_managers
-#     managers = new_company.managers
-#     count = 0
-#     managers.each do |manager|
-#       puts "#{count+=1}: Title: #{manager[:manager_title]} ---- Name: #{manager[:manager_name]}"
-#     end
-#   end
-#
-#   def display_company_stats
-#     stats = new_company.stats
-#     stats.each do |stat|
-#       puts "#{stats[:stats_title]}: Recent Quarter Return: #{stats[:recent_quarter]} ---- Annual Return: #{stats[:yearly]} "
-#       puts "---------------------------------------------------------------------------------------------------------------"
-#     end
-#   end
-#
-#   def display_company_events
-#     events = new_company.events
-#     events.each do |event|
-#       puts "#{event}"
-#       puts "--------"
-#     end
-#   end
-#
-#   def display_company_posts
-#     posts = new_company.posts
-#     posts.each do |post|
-#       puts "#{post[:reddit_header]}"
-#       puts "#{post[:expanded]}"
-#       puts "-----------------------"
-#     end
-#   end
-#
-#   def display_front_page_news
-#     newss = front_page.news
-#     newss.each do |news|
-#       puts "Title: #{news[:title]}"
-#       puts "Author: #{news[:author]}"
-#       puts "#{news[:snippet]}"
-#       puts "------------------------"
-#     end
-#   end
-#
-#   def display_front_page_indexes
-#     indexes = front_page.indexes
-#     puts "Index ---- Value ---- Movement"
-#     indexes.each do |index|
-#       puts "#{index[:name]}  #{index[:value]}   #{index[:movement]}"
-#       puts " "
-#     end
-#   end
-#
-#   def display_front_page_gainers
-#     gainers = front_page.gainers
-#       puts "Ticker ---- Name ---- % Change ---- Market Cap"
-#     gainers.each do |gainer|
-#       puts "#{gainer[:symbol]}, #{gainer[:company_name]}: #{gainer[:gain_loss]}, #{gainer[:market_cap]}"
-#     end
-#
-#   end
-#
-#   def display_front_page_losers
-#     losers = front_page.losers
-#       puts "Ticker ---- Name ---- % Change ---- Market Cap"
-#     gainers.each do |gainer|
-#       puts "#{gainer[:symbol]}, #{gainer[:company_name]}: #{gainer[:gain_loss]}, #{gainer[:market_cap]}"
-#     end
-#
-#   end
-# end
